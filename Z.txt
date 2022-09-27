@@ -1,0 +1,42 @@
+Bài toán
+Cho m?t xâu S. V?i m?i v? trí i c?a S, g?i z[i] là giá tr? l?n nh?t sao cho xâu con d? dài z[i] b?t d?u t?i i b?ng v?i ti?n t? d? dài z[i] c?a S. Nói cách khác, v?i m?i i, tìm x=z[i] l?n nh?t sao cho S[0..x-1] == S[i..i+x-1] (ph?n t? dánh s? t? 0).
+
+Ð? ph?c t?p
+O(N)
+
+Code này c?a Nguy?n Ti?n Trung Kiên
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define N 500005
+int n, z[N];
+char a[N];
+
+void make_z(char a[], int n, int F[]) {
+    int L=-1, R=-1; F[0]=n;
+    for (int i=1; i<n; i++) {
+        if (i>R) {
+            L=i; R=i-1;
+            while (R<n-1 && a[R+1]==a[R-L+1]) R++;
+            F[i]=R-L+1;
+        } else {
+            if (F[i-L]<R-i+1) F[i]=F[i-L];
+            else {
+                L=i;
+                while (R<n-1 && a[R+1]==a[R-L+1]) R++;
+                F[i]=R-L+1;
+            }
+        }
+    }
+}
+
+main(){
+    gets(a); n=strlen(a);
+    make_z(a, n, z);
+    for (int i=0; i<n; i++)
+    printf("%d ", z[i]);
+    printf("\n");
+}

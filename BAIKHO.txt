@@ -1,0 +1,840 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+TAAN
+
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=3005;
+typedef pair<int,int> ii;
+int n,m;
+int a[N][N],s[N][N];
+ii lab[N][N],pre[N],key[N][N];
+int get(int u,int v,int x,int y){
+    if (u==1||v==1) return -1;
+    u=max(u,1),v=max(v,1),x=max(x,1),y=max(y,1);
+    return s[x][y]-s[u-1][y]-s[x][v-1]+s[u-1][v-1];
+}
+int main(){
+    freopen("ho.inp","r",stdin);
+    freopen("ho.out","w",stdout);
+    scanf("%d%d",&m,&n);
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j) scanf("%d",&a[i][j]);
+    }
+
+    for (int i=1;i<=m+1;++i){
+        for (int j=1;j<=n+1;++j)
+        s[i][j]=s[i-1][j]+s[i][j-1]-s[i-1][j-1]+a[i][j];
+    }
+    for (int j=1;j<=n;++j) pre[j]={-1,-1};
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j){
+             if (a[i][j]==1){
+                lab[i][j]=pre[j];
+                if (lab[i][j].first<0) pre[j]={i,j},lab[i][j]={i,j};
+             }
+             else pre[j]={-1,-1};
+        }
+    }
+    for (int i=1;i<=m;++i) pre[i]={-1,-1};
+    for (int i=1;i<=n-1;++i){
+        for (int j=1;j<=m-1;++j){
+            if (a[j][i]==1){
+                key[j][i]=pre[j];
+                if (key[j][i].first<0) pre[j]={j,i},key[j][i]={j,i};
+            }
+            else pre[j]={-1,-1};
+        }
+    }
+    /*
+    cout<<lab[3][4].first<<" "<<lab[3][4].second<<endl;
+    cout<<key[3][4].first<<" "<<key[3][4].second<<endl;
+    */
+    int ans=0;
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+        if (a[i][j]){
+            int tmp=get(lab[i][j].first,key[i][j].second,i,j);
+            if (tmp!=(i-lab[i][j].first+1)*(j-key[i][j].second+1)) continue;
+            if (get(lab[i][j].first-1,key[i][j].second-1,i+1,j+1)==tmp) ans=max(ans,tmp);
+        }
+    }
+    cout<<ans;
+}
+//
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=2005;
+int s[N][N],a[N][N];
+typedef pair<int,int> ii;
+ii lab[N][N],lab2[N][N];
+int n,m;
+int get(int x,int y,int u,int v){
+    x=max(x,1);y=max(y,1),u=max(u,1),v=max(v,1);
+    return s[u][v]-s[u][y-1]-s[x-1][v]+s[x-1][y-1];
+}
+int main(){
+    freopen("ho.inp","r",stdin);
+    freopen("ho.out","w",stdout);
+    scanf("%d%d",&m,&n);
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j){
+            scanf("%d",&a[i][j]);
+        }
+    }
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j) s[i][j]=s[i-1][j]+s[i][j-1]-s[i-1][j-1]+a[i][j];
+    }
+    ii pre;
+    // trai nhat
+    for (int i=1;i<=m;++i){
+        pre={-1,-1};
+        for (int j=1;j<=n;++j){
+            if (a[i][j]){
+                lab[i][j]=pre;
+                if (lab[i][j].first<0) lab[i][j]={i,j},pre=lab[i][j];
+            }
+            else pre={-1,-1};
+        }
+    }
+    // tren nhat
+    for (int i=1;i<=n;++i){
+        pre={-1,-1};
+        for (int j=1;j<=m;++j){
+            if (a[j][i]){
+                lab2[j][i]=pre;
+                if (lab2[j][i].first<0) lab2[j][i]={j,i},pre=lab2[j][i];
+            }
+            else pre={-1,-1};
+        }
+    }
+    int ans=0;
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+            if (a[i][j]){
+            int tmp=get(lab2[i][j].first,lab[i][j].second,i,j);
+           // if (i==14)  cout<<tmp<<" "<<i<<" "<<j<<" "<<get(lab2[i][j].first-1,lab[i][j].second-1,i+1,j+1)<<endl;
+          //  cout<<tmp<<endl;
+            if (lab2[i][j].first-1<=0||lab[i][j].second-1<=0||i+1>m||j+1>n) continue;
+
+            if (tmp!=get(lab2[i][j].first-1,lab[i][j].second-1,i+1,j+1)) continue;
+            if (tmp!=(i-lab2[i][j].first+1)*(j-lab[i][j].second+1)) continue;
+            ans=max(ans,tmp);
+        }
+    }
+    cout<<ans;
+}
+
+
+
+
+
+
+//
+ qhd
+#include<bits/stdc++.h>
+using namespace std;
+const int nmax=100011;
+typedef long long ll;
+
+int n, k, cnt[nmax];
+ll s[nmax], f[nmax];
+vector<int> e[nmax], l[nmax];
+
+void dfs(int x,int p){
+    for (int i=e[x].size();i--;){
+        int y=e[x][i];
+        if (y==p) continue;
+        dfs(y,x);
+        if (cnt[y]){
+            cnt[x]+=cnt[y];
+            s[x]+=s[y]+l[x][i];
+            f[x]=max(f[x],f[y]+l[x][i]);
+        }
+    }
+    //printf("f[%d]=%lld, cnt=%d, s=%lld\n",x,f[x],cnt[x],s[x]);
+}
+
+void dfs(int x,int p,ll S,ll L){
+    vector<ll> lst(e[x].size());
+    ll best=0;
+    for (int i=0;i<e[x].size();++i)
+        {
+        int y=e[x][i];
+        if (y==p) continue;
+        lst[i]=best;
+        if (cnt[y]) best=max(best,f[y]+l[x][i]);
+       }
+
+    best=0;
+    for (int i=e[x].size();i--;)
+    {
+        int y=e[x][i];
+        if (y==p) continue;
+        lst[i]=max(lst[i],best);
+        if (cnt[y]) best=max(best,f[y]+l[x][i]);
+    }
+    for (int i=e[x].size();i--;)
+    {
+        int y=e[x][i];
+        if (y==p) continue;
+        ll SS=cnt[y]==k?0:cnt[x]==cnt[y]?(S+l[x][i]):(cnt[y]==0?(S+s[x]+l[x][i]):(S+s[x]-s[y]));
+        ll LL=cnt[y]==k?0:(max(L,lst[i])+l[x][i]);
+        dfs(y,x,SS,LL);
+    }
+    f[x]=2*(s[x]+S)-max(L,f[x]);
+}
+
+main(){
+    freopen("FTREE.inp","r",stdin);
+    freopen("FTREE.out","w",stdout);
+    scanf("%d%d",&n,&k);
+    for (int i=1;i<n;++i){
+        int u,v,k;
+        scanf("%d%d%d",&u,&v,&k);
+        e[u].push_back(v);
+        l[u].push_back(k);
+        e[v].push_back(u);
+        l[v].push_back(k);
+    }
+    for (int i=0;i<k;++i){
+        int x;
+        scanf("%d",&x);
+        cnt[x]=1;
+    }
+    dfs(1,0);
+    dfs(1,0,0,0);
+    for (int i=1;i<=n;++i) printf("%lld\n",f[i]);
+}
+
+//
+bntk
+
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll const vc=1e18;
+int const N = 300009;
+
+struct anhthu
+{
+    ll Min,Max,Sum;
+};
+
+anhthu it[4*N];
+ll n,q,l[4*N],h[4*N],lz[4*N];
+string s;
+
+void make_it(int x, int low, int high)
+{
+    l[x]=low; h[x]=high;
+    if (low==high)
+    {
+        it[x].Max=it[x].Min=it[x].Sum=s[low]==')'?-1:1;
+        return;
+    }
+    int mid=(low+high)/2;
+    make_it(2*x,low,mid); make_it(2*x+1,mid+1,high);
+    it[x].Sum=it[2*x].Sum+it[2*x+1].Sum;
+    it[x].Min=min(it[2*x].Min,it[2*x+1].Min+it[2*x].Sum);
+    it[x].Max=max(it[2*x].Max,it[2*x+1].Max+it[2*x].Sum);
+}
+
+void down(int x)
+{
+    ll val=lz[x];
+    lz[x]=0;
+    lz[2*x]+=val;
+    lz[2*x+1]+=val;
+    if (val%2==0) return;
+    for (int j=0;j<=1;j++)
+    {
+        ll mx=it[2*x+j].Max, mn=it[2*x+j].Min;
+        it[2*x+j].Sum*=-1;
+        it[2*x+j].Min=-mx;
+        it[2*x+j].Max=-mn;
+    }
+}
+
+void update(int x, int u, int v)
+{
+    if (l[x]>v || h[x]<u) return;
+    if (u<=l[x] && h[x]<=v)
+    {
+        lz[x]++;
+        ll mx=it[x].Max, mn=it[x].Min;
+        it[x].Sum*=-1;
+        it[x].Min=-mx;
+        it[x].Max=-mn;
+        return;
+    }
+    down(x);
+    update(2*x,u,v); update(2*x+1,u,v);
+    it[x].Sum=it[2*x].Sum+it[2*x+1].Sum;
+    it[x].Min=min(it[2*x].Min,it[2*x+1].Min+it[2*x].Sum);
+    it[x].Max=max(it[2*x].Max,it[2*x+1].Max+it[2*x].Sum);
+}
+
+anhthu get(int x, int u, int v)
+{
+    if (l[x]>v || h[x]<u) return anhthu{vc,-vc,0};
+    if (u<=l[x] && h[x]<=v) return it[x];
+    down(x);
+    anhthu nd1=get(2*x,u,v), nd2=get(2*x+1,u,v);
+    anhthu neww;
+    neww.Min=min(nd1.Min,nd2.Min+nd1.Sum);
+    neww.Max=max(nd1.Max,nd2.Max+nd1.Sum);
+    neww.Sum=nd1.Sum+nd2.Sum;
+    return neww;
+}
+
+int main ()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    freopen("BTNK.inp","r",stdin);
+    freopen("BTNK.out","w",stdout);
+
+    cin>>s;
+    n=s.size();
+    s=" "+s;
+    make_it(1,1,n);
+    cin>>q;
+    while (q--)
+    {
+        ll ty,i,j;
+        cin>>ty>>i>>j;
+        if (ty==1) update(1,i,j);
+        else
+        {
+            anhthu cnt=get(1,i,j);
+            if (cnt.Sum==0 && cnt.Min>=0) cout<<cnt.Max<<"\n";
+            else cout<<-1<<"\n";
+        }
+    }
+
+    return 0;
+}
+//
+
+
+#include<bits/stdc++.h>
+using namespace std;
+#define task "BTN3"
+typedef long long ll;
+const int maxn=2001;
+string kk;
+int n,k,t(0);
+string f[maxn][maxn];
+char stackk[maxn+100];
+string res;
+string s;
+string kq;
+//stack
+string cong(string a, string b)
+{
+    string res="";
+    while(a.length() < b.length()) a="0"+a;
+    while(b.length() < a.length()) b="0"+b;
+    int carry=0;
+    for(int i=a.length()-1;i>=0;i--)
+    {
+        int tmp=a[i]-48 + b[i]-48 + carry;
+        carry=tmp/10;
+        tmp=tmp%10;
+        res=(char)(tmp+48)+res;
+    }
+    if(carry>0) res="1"+res;
+    return res;
+}
+
+string tru(string a, string b)
+{
+    string res="";
+    while(a.length() < b.length()) a="0"+a;
+    while(b.length() < a.length()) b="0"+b;
+    bool neg=false;
+    if(a<b)
+    {
+        swap(a,b);
+        neg=true;
+    }
+    int borrow=0;
+    for(int i=a.length()-1; i>=0;i--)
+    {
+        int tmp=a[i]-b[i]-borrow;
+        if(tmp<0)
+        {
+            tmp+=10;
+            borrow=1;
+        }
+        else borrow=0;
+        res=(char)(tmp%10 + 48) + res;
+    }
+    while(res.length()>1 && res[0]=='0') res.erase(0,1);
+    if(neg) res="-"+res;
+    return res;
+}
+string nhan(string a, string b)
+{
+    string res="";
+    int n=a.length();
+    int m=b.length();
+    int len=n+m-1;
+    int carry=0;
+    for(int i=len;i>=0;i--)
+    {
+        int tmp=0;
+        for(int j=n-1;j>=0;j--)
+            if(i-j<=m && i-j>=1)
+            {
+                int a1=a[j]-48;
+                int b1=b[i-j-1]-48;
+                tmp+=a1*b1;
+            }
+            tmp+=carry;
+            carry=tmp/10;
+            res=(char)(tmp%10 + 48)+res;
+    }
+    while(res.length()>1 && res[0]=='0') res.erase(0,1);
+    return res;
+}
+
+string qhd(int i,int c)
+  {
+      if(f[i][c]!=kk) return f[i][c];
+      if(i>n)
+      {
+          if(c==0)
+          {
+            f[i][c]="1";
+        return f[i][c];
+          }
+          else
+          {
+              f[i][c]="0";
+              return f[i][c];
+          }
+      }
+      else
+      {
+          string s1;
+          s1='0';
+          if(c<k)
+          {
+              stackk[c+1]='(';
+              s1=cong(s1,qhd(i+1,c+1));
+              stackk[c+1]='[';
+              s1=cong(s1,qhd(i+1,c+1));
+             stackk[c+1]='{';
+            s1=cong(s1,qhd(i+1,c+1));
+          }
+          if(c>0)
+              s1=cong(s1,qhd(i+1,c-1));
+          f[i][c]=s1;
+          return s1;
+      }
+  }
+
+ void timkq(int i,int c)
+  {
+      if(t==0)
+    {
+        if(i>n)
+      {
+          res=cong(res,"1");
+          cout<<res;
+          t=1;return ;
+      }
+      if(s[i]=='(')
+      {
+          stackk[c+1]='(';
+          timkq(i+1,c+1);
+      }
+      else
+      {
+          if(c<k)
+          {
+              stackk[c+1]='(';
+              res=cong(res,qhd(i+1,c+1));
+           }
+      }
+      if(s[i]==')')
+      {
+       timkq(i+1,c-1);
+      }
+      else
+      {
+          if(c>0)
+          {
+              if(stackk[c]=='(')
+              {
+                 res=cong(res,qhd(i+1,c-1));
+              }
+          }
+      }
+
+
+      if(s[i]=='[')
+      {
+          stackk[c+1]='[';
+          timkq(i+1,c+1);
+      }
+      else
+      {
+          if(c<k)
+          {
+              stackk[c+1]='[';
+              res=cong(res,qhd(i+1,c+1));
+      }
+      }
+
+       if(s[i]==']')
+      {
+       timkq(i+1,c-1);
+      }
+      else
+      {
+          if(c>0)
+          {
+              if(stackk[c]=='[')
+              {
+                 res=cong(res,qhd(i+1,c-1));
+              }
+          }
+      }
+
+       if(s[i]=='{')
+      {
+          stackk[c+1]='{';
+          timkq(i+1,c+1);
+      }
+      else
+      {
+          if(c<k)
+          {
+              stackk[c+1]='{';
+              res=cong(res,qhd(i+1,c+1));
+          }
+      }
+
+         if(s[i]=='}')
+      {
+       timkq(i+1,c-1);
+      }
+      else
+      {
+          if(c>0)
+          {
+              if(stackk[c]=='{')
+              {
+                 res=cong(res,qhd(i+1,c-1));
+              }
+          }
+      }
+  }
+      }
+int main()
+ {
+     ios_base::sync_with_stdio(false);
+     cin.tie(NULL);
+     freopen(task".INP","r",stdin);
+     freopen(task".OUT","w",stdout);
+
+     cin>>n>>k;
+
+     cin>>s;
+       s=" "+s;
+ kk="-1";
+ for (int i=0;i<=n+1;i++)
+    for (int j=0;j<=n+1;j++)
+    f[i][j]="-1";
+
+    res="0";
+    kq=qhd(1,0);
+
+    for (int i=0;i<=maxn;i++)
+        stackk[i]='0';
+     timkq(1,0);
+ //    cout<<res;
+
+     return 0;
+
+
+ }
+
+//
+
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+#define task "BTN"
+const int maxn=1e2+5;
+typedef pair<int,int> ii;
+#define fi first
+#define se second
+const int maxxn=1e5+5;
+ll n,k;
+ll ans(0),res(0);
+
+char s[maxxn];
+ll f[maxn][maxn][maxn];
+ll heso(char x,char y)
+{
+    if (x=='(')
+    {
+        if (y==')') return 1;
+        else if (y=='?') return 1;
+        return 0;
+    }
+     if (x=='?')
+    {
+         if (y=='?') return 3;
+        else if (y==')' || y==']' || y=='}') return 1;
+    }
+    if (x=='{')
+    {
+        if (y=='}') return 1;
+        else if (y=='?') return 1;
+        return 0;
+    }
+    if (x=='[')
+    {
+        if (y==']') return 1;
+        else if (y=='?') return 1;
+        return 0;
+    }
+    return 0;
+}
+ll qhd(ll l,ll r,ll k)
+{
+    if (k<0) return 0;
+    if (l==r) return 0;
+    if (l>r) return 1;
+    if (f[l][r][k]!=-1) return f[l][r][k];
+    ll kq=0;
+    f[l][r][k]=0;
+    for(ll i=l+1;i<=r;i++)
+    {
+        f[l][r][k]+=heso(s[l],s[i])*qhd(l+1,i-1,k-1)*qhd(i+1,r,k);
+    }
+    return f[l][r][k];
+}
+main()
+{
+    freopen(task".inp","r",stdin);
+    freopen(task".out","w",stdout);
+    memset(f,-1,sizeof(f));
+    scanf("%lld%lld",&n,&k);
+    scanf("%s",s+1);
+    memset(f,-1,sizeof(f));
+
+    ans=0;
+    cout<<qhd(1,n,k)-qhd(1,n,k-1);
+
+    return 0;
+}
+//
+
+
+qhd tren bang
+
+
+ #include<bits/stdc++.h>
+ using namespace std;
+ #define task "C11GAR"
+ const int vc=1e9+5;
+ const int maxn=255;
+ int kq[maxn][maxn],f[maxn][maxn][maxn];
+ int l,w,k;
+ int n,a[maxn][maxn],b[maxn][maxn];
+ int g[maxn][maxn];
+ int get(int i,int j,int x,int y)
+  {
+      return b[x][y]-b[i-1][y]-b[x][j-1]+b[i-1][j-1];
+  }
+  void intn()
+   {
+       scanf("%d%d",&l,&w);
+       scanf("%d%d",&n,&k);
+       for (int i=1;i<=n;i++)
+       {
+           int u,v;
+           scanf("%d%d",&u,&v);
+           a[u][v]++;
+        }
+
+        for (int i=1;i<=l;i++)
+            for (int j=1;j<=w;j++)
+        {
+            b[i][j]=b[i-1][j]+b[i][j-1]-b[i-1][j-1]+a[i][j];
+            g[i][j]=vc;
+        }
+   }
+
+   void chuanbi()
+    {
+        for (int i=0;i<=l+1;i++)
+            for (int j=0;j<=w+1;j++)
+            kq[i][j]=vc;
+
+
+        for (int i=1;i<=l;i++)
+            for (int j=i;j<=l;j++)
+        {
+            int kk=1;
+            for (int pp=1;pp<=w;pp++)
+            {
+                while (kk<=pp&&get(i,kk,j,pp)>=k)
+                    kk++;
+                if(kk>1&&get(i,kk-1,j,pp)==k)
+                f[i][j][pp]=kk-1;
+                else
+                    f[i][j][pp]=vc;
+
+                if(f[i][j][pp]!=vc)
+                g[j][pp]=min(g[j][pp],(j-i+2+pp-kk+1)*2);
+        }
+    }
+
+     for (int i=1;i<=l;i++)
+        for (int j=1;j<=w;j++)
+     {
+         kq[i][j]=min(min(kq[i-1][j],kq[i][j-1]),g[i][j]);
+     }
+    }
+
+    void process()
+     {
+         int res(vc);
+
+         for (int i=1;i<=l;i++)
+            for (int j=1;j<=w;j++)
+         {
+             for (int t=1;t<=i;t++)
+             {
+                 int e=f[t][i][j];
+                 if(e==vc) continue;
+                 res=min(res,(j-e+1+i-t+1)*2+min(kq[t-1][w],kq[l][e-1]));
+             }
+         }
+         cout<<res;
+
+         return ;
+     }
+
+     int main()
+      {
+          freopen(task".INP","r",stdin);
+          freopen(task".OUT","w",stdout);
+
+          intn();
+          chuanbi();
+          process();
+
+          return 0;
+      }
+//
+
+#include<bits/stdc++.h>
+using namespace std;
+const int N=30*(1<<15);
+#define int long long
+int dp[3][N],poww[65];
+int n,k,cnt;
+string s,x;
+struct aho{
+    int ch[N][3],d[N],flag[N],sz=1;
+    void add(string s){
+        int u=1;
+        for (int i=0;i<s.size();++i){
+            char c=s[i]-'0';
+            if (ch[u][c]) u=ch[u][c];
+            else u=ch[u][c]=++sz;
+        }
+        flag[u]=1;
+    }
+    void init(){
+        queue<int> q;
+        for (int i=0;i<=1;++i) if (ch[1][i]) q.push(ch[1][i]),d[ch[1][i]]=1;
+        while (q.size()){
+            int u=q.front();
+            q.pop();
+            for (int i=0;i<=1;++i)
+            if (ch[u][i]){
+                int v=ch[u][i];
+                int w=d[u];
+                while (!ch[w][i]&&w) w=d[w];
+                d[v]=w ? ch[w][i] : 1;
+                q.push(v);
+            }
+        }
+    }
+    int get(int u,int c){
+        // current vertex is u, go to status c -> return what the next vertex is
+        if (ch[u][c]) return ch[u][c];
+        while (u>1&&!ch[u][c]) u=d[u];
+        return ch[u][c] ? ch[u][c] : 1;
+    }
+}T;
+void run(int i){
+    if (i>k) {T.add(x);return;}
+    else{
+        if (s[i]=='1') {
+            x[i]='1';
+            run(i+1);
+            return;
+        }
+        for (int j=0;j<=1;++j){
+            x[i]=(char)(j+'0');
+            run(i+1);
+        }
+    }
+}
+main(){
+    freopen("seed.inp","r",stdin);
+    freopen("seed.out","w",stdout);
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);cout.tie(0);
+    cin>>n>>s;
+    k=s.size()-1;
+    x=s;
+    run(0);
+    T.init();
+    poww[0]=1;
+    int ans=0;
+    for (int i=1;i<=60;++i) poww[i]=poww[i-1]*2;
+    dp[0][1]=1;
+    for (int i=1;i<=n;++i){
+        int t=(i-1)&1;
+        memset(dp[t^1],0,sizeof(dp[t^1]));
+        for (int u=1;u<=T.sz;++u){
+            dp[t^1][T.get(u,0)]+=dp[t][u];
+            dp[t^1][T.get(u,1)]+=dp[t][u];
+        }
+        for (int u=1;u<=T.sz;++u)
+            if (T.flag[u])
+            ans+=dp[t^1][u]*poww[n-i],dp[t^1][u]=0;
+    }
+    cout<<ans;
+}
+
+//
+	
+

@@ -1,0 +1,91 @@
+ll pow(ll x, ll y){
+	if (y==0) return 1;
+	if (y==1) return x%base;
+	ll tmp=pow(x, y/2);
+	return ((tmp*tmp)%base)*pow(x, y%2)%base;
+}
+
+ll nCk(const ll &n, const ll &k){
+	return (gt[n]*(pow(gt[n-k], base-2)*pow(gt[k], base-2)%base)%base);
+}
+
+void init(){
+    gt[0]=1;
+    for (int i=1;i<=m*n+1;++i) gt[i]=(gt[i-1]*i)%base;
+}
+
+
+
+ #include<bits/stdc++.h>
+ using namespace std;
+ #define task "CAL1"
+ typedef long long ll;
+ const int maxn=2e5+5;
+ const int mod=1e5+3;
+ ll n,m,a,b,k;
+ long long fact[maxn];
+
+ vector<ll> getRepresentation(ll N)
+ {
+    vector<ll> res;
+    while (N > 0)
+        {
+        res.push_back(N % mod);
+        N /= mod;
+    }
+    return res;
+}
+ long long power(ll a,long long n)
+ {
+    // if (n==1) return a;
+    if(n==0) return 1;
+     ll p=power(a,n/2);
+     if (n%2==0) return (p*p)%mod;
+     else return ((p*p)%mod)*a%mod;
+ }
+ void intn()
+ {
+     fact[0]=1;
+     for (int i=1;i<=mod;i++)
+     {
+         fact[i]=(fact[i-1]*i)%mod;
+     }
+ }
+//  return (((fact[N] * binpow(fact[N - K], M - 2)) % M) * binpow(fact[K], M - 2)) % M;
+ ll C(ll n,ll k)
+ {
+     if(k>n) return 0;
+     return ((fact[n]*power(fact[n-k],mod-2)%mod)*power(fact[k],mod-2))%mod;
+ }
+
+ long long cc(ll N,ll K)
+ {
+ vector<ll> n = getRepresentation(N);
+ vector<ll> k = getRepresentation(K);
+ long long res = 1;
+  for (int i = 0; i < k.size(); ++i)
+ {
+     res = (res * C(n[i], k[i])) % mod;
+  }
+  return res;
+ }
+
+ int main()
+ {
+     ios_base::sync_with_stdio(false);
+     cin.tie(NULL);
+    freopen(task".INP","r",stdin);
+     freopen(task".OUT","w",stdout);
+     intn();
+     int p;
+     scanf("%d",&p);
+     for (int i=1;i<=p;i++)
+     {
+         scanf("%lld%lld%lld%lld",&a,&b,&n,&k);
+         ll ngocdiep;
+         ngocdiep=power(a,n-1)%mod;
+         ngocdiep*=power(b,k-1)%mod;
+         ngocdiep*=cc(n+k-2,n-1)%mod;
+         printf("%lld\n",ngocdiep%mod);
+     }
+ }

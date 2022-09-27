@@ -1,0 +1,121 @@
+
+ #include<bits/stdc++.h>
+ using namespace std;
+ #define task "RTREE"
+
+ const int maxn=5e5+5;
+
+ int con[maxn],n,m,u1,v1;
+ vector<vector<int> > a(maxn);
+bool free1[maxn];
+int b[maxn][32],h[maxn];
+ int cnt(0),last[maxn],pre[maxn];
+  void dfs(int u)
+  {
+       h[u]=h[b[u][0]]+1;
+      last[u]=++cnt;
+      free1[u]=false;
+      for (int i=0;i<a[u].size();i++)
+      {
+          int v=a[u][i];
+          if(b[u][0]!=v)
+          {
+              b[v][0]=u;
+              dfs(v);
+          }
+      }
+         pre[u]=cnt;
+  }
+  int dfs1(int u)
+  {
+      free1[u]=false;
+      for (int i=0;i<a[u].size();i++)
+      {
+          int v=a[u][i];
+          if(free1[v]==true)
+          {
+              con[u]+=dfs1(v);
+          }
+      }
+      return con[u];
+  }
+  void qhd()
+  {
+      memset(free1,true,sizeof(free1));
+     // memset(b,-1,sizeof(b));
+      dfs(1);
+    for (int i=1;(1<<i)<=n;i++)
+    {
+        for (int j=1;j<=n;j++)
+        {
+            //if(b[j][i-1]!=-1)
+            b[j][i]=b[b[j][i-1]][i-1];
+        }
+    }
+    //b[1][0]=1;
+
+  }
+  int lca(int u,int v)
+  {
+      if(h[u]<h[v]) swap(u,v);
+      for (int i=18;i>=0;i--)
+      {
+          if(h[u]-(1<<i)>=h[v])
+          {
+              u=b[u][i];
+          }
+      }
+      if(u==v) return u;
+      else
+      {
+          for (int i=18;i>=0;i--)
+          {
+              if(b[u][i]!=b[v][i])
+                {
+                    u=b[u][i];
+                    v=b[v][i];
+                }
+          }
+      }
+      return b[u][0];
+    }
+  int main()
+  {
+      ios_base::sync_with_stdio(false);
+      cin.tie(NULL);
+      freopen(task".INP","r",stdin);
+      freopen(task".OUT","w",stdout);
+
+      scanf("%d%d",&n,&m);
+      for (int i=1;i<=n-1;i++)
+      {
+          scanf("%d%d",&u1,&v1);
+          a[u1].push_back(v1);
+          a[v1].push_back(u1);
+      }
+       qhd();
+       int p[maxn];
+      for (int j=1;j<=m;j++)
+      {
+          int x,y;
+          scanf("%d%d",&x,&y);
+          int l=lca(x,y);
+          p[last[l]]-=2;
+          p[last[x]]++;
+          p[last[y]]++;
+      }
+      //cout<<b[3][1];
+      memset(free1,true,sizeof(free1));
+      int l=dfs1(1);
+     // cout<<lca(2,3);
+      int ans(0);
+      for (int i=2;i<=n;i++)
+      {
+          p[i]+=p[i-1];
+      }
+      for (int i=2;i<=n;i++)
+      {
+          ans=max(ans,p[pre[i]]-p[last[i]-1]);
+      }
+      cout<<ans;
+  }

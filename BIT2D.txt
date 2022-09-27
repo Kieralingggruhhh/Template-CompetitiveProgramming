@@ -1,0 +1,156 @@
+Bài toán
+V?i m?t dãy s?, th?c hi?n các truy v?n:
+u X Y : tang ph?n t? th? X lên Y don v?
+g X Y : tính t?ng các ph?n t? t? X d?n Y
+f X : tìm s? i nh? nh?t sao cho get(1,i) >= X
+Ð? ph?c t?p
+update: O(logn)
+get: O(logn)
+find: O(logn)
+
+Code này c?a Nguy?n Ti?n Trung Kiên
+#include <stdio.h>
+#include <stdlib.h>
+
+#define long long long
+#define SetLength(a, n, type) a = (type*) calloc(n, sizeof (type))
+
+struct indexed_tree {   
+   int n, logn;
+   long * T;
+
+   void clear(int N){
+      n=1, logn=0; 
+      while (n<N) { n*=2; logn++; }
+      SetLength(T, n+1, long);
+   }
+   void update(int pos, int value){
+      for (int i=pos; i<=n; i+=i&-i)
+      T[i]+=value;
+   }
+   long get(int pos){
+      long r=0;
+      for (int i=pos; i>=1; i-=i&-i)
+      r += T[i];
+      return r;
+   }
+   long get(int ll, int rr){ 
+      return get(rr)-get(ll-1); 
+   }
+   int lower_bound(int node, int level, long value){
+      for (int i=level-1; i>=0; i--)
+      if (T[node-(1<<i)]>=value) 
+      return lower_bound(node-(1<<i), i, value);
+      else value-=T[i];
+      return node;
+   }
+   int lower_bound(long value){
+      if (value>T[n]) return 0;
+      else return lower_bound(n, logn, value);
+   }
+};
+
+int n, m;
+indexed_tree tr;
+
+main(){
+   char c; int i, x, y;
+
+   scanf("%d%d", &n, &m);
+   
+   tr.clear(n);
+   for (i=1; i<=m; i++){
+      scanf(" %c", &c);
+      if (c=='u' || c=='g') scanf("%d%d", &x, &y);
+      else if (c=='f') scanf("%d", &x);
+
+      if (c=='u') tr.update(x, y);
+      if (c=='g') printf("%lld\n", tr.get(x, y));
+      if (c=='f') printf("%d\n", tr.lower_bound(x));
+
+//KQUERY 2//
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int maxn = 3e4, Val = 1e4, maxm = 174;
+int n, q, m, BIT[maxm+1][Val+1], A[maxn+1], ans;
+ 
+void Update(int x, int y, int z)
+{
+    while (x <= maxm)
+    {
+        int i = y;
+        while (i <= Val)
+        {
+            BIT[x][i] += z;
+            i += i & (-i);
+        }
+        x += x & (-x);
+    }
+}
+ 
+int Get(int x, int y)
+{
+    int res = 0;
+    while (x > 0)
+    {
+        int i = y;
+        while (i > 0)
+        {
+            res += BIT[x][i];
+            i -= i & (-i);
+        }
+        x -= x & (-x);
+    }
+    return res;
+}
+ 
+int Query(int i, int j, int u, int v)
+{
+    if (i > u || j > v) return 0;
+    return Get(u, v) - Get(i-1, v) - Get(u, j-1) + Get(i-1, j-1);
+}
+ 
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(NULL); cout.tie(NULL);
+    cin >> n;
+    m = sqrt(n);
+    for (int i=1; i<=n; i++)
+    {
+        cin >> A[i];
+        Update(i/m + 1 - (i % m == 0) ,A[i], 1);
+    }
+    cin >> q;
+    while (q--)
+    {
+        int type, u, v, k;
+        cin >> type;
+        if (type == 0)
+        {
+            int i, val;
+            cin >> i >> val;
+            Update(i/m + 1 - (i % m == 0), A[i], -1);
+            Update(i/m + 1 - (i % m == 0), val, 1);
+            A[i] = val;
+            continue;
+        }
+        cin >> u >> v >> k;
+        int L = u/m + 1 - (u % m == 0), R = v/m + 1 - (v % m == 0);
+        if (L == R)
+        {
+            ans = 0;
+            for (int i=u; i<=v; i++)
+                if (A[i] > k) ans ++;
+            cout << ans << "\n";
+            continue;
+        }
+        ans = Query(L+1, k+1, R-1, Val);
+        for (int i=u; i<=L*m; i++) ans += (A[i] > k);
+        for (int i=(R-1)*m+1; i<=v; i++) ans += (A[i] > k);
+        cout << ans << "\n";
+    }
+    return 0;
+}

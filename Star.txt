@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int, int> ii;
+const int N=505;
+struct Edge
+{
+    int v, flow, C, rev;
+};
+struct Dinic
+{
+    int level[N], start[N];
+    vector<Edge> edge[N];
+
+    void addEdge(int u, int v, int C)
+    {
+        Edge a{v, 0, C,edge[v].size()};
+        Edge b{u, 0, 0,edge[u].size()};
+        edge[u].push_back(a);
+        edge[v].push_back(b);
+    }
+
+    bool BFS(int s, int t)
+    {
+        for (int i=0; i<N; i++) level[i] = -1;
+        level[s] = 0;
+
+        queue<int> q;
+        q.push(s);
+        while (!q.empty())
+        {
+            int u = q.front();
+            q.pop();
+            for (int i=0; i<edge[u].size(); i++)
+            {
+                Edge e=edge[u][i];
+                if (level[e.v] < 0  && e.flow < e.C)
+                {
+                    level[e.v] = level[u] + 1;
+                    q.push(e.v);
+                }
+            }
+        }
+
+        return level[t] >= 0;
+    }
+
+    int incflow(int u, int flow, int t)
+    {
+        if (u == t) return flow;
+
+        for (  ; start[u] < edge[u].size(); start[u] ++)
+        {
+            Edge &e = edge[u][start[u]];
+
+            if (level[e.v] == level[u]+1 && e.flow < e.C)
+            {
+                int curr_flow = min(flow, e.C - e.flow);
+                int temp_flow = incflow(e.v, curr_flow, t);
+
+                if (temp_flow > 0)
+                {
+                    e.flow += temp_flow;
+                    edge[e.v][e.rev].flow -= temp_flow;
+                    return temp_flow;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    int get(int s, int t)
+    {
+        if (s == t) return -1;
+        int total = 0;
+
+        while (BFS(s, t))
+        {
+            for (int i=0; i<N; i++)
+                start[i] = 0;
+            while (int flow = incflow(s,1e9+7, t)) total += flow;
+        }
+
+        return total;
+    }
+};
+int c[N],d[N];
+int n,m;
+char st[N][N];
+int ok(int x){
+    Dinic T;
+    int s=m+n+1,t=m+n+2;
+    int ss=m+n+3,tt=m+n+4;
+    int ans=0,res=0;
+    T.addEdge(t,s,1e9+7);
+    //T.addEdge(tt,ss,1e9+7);
+    memset(c,0,sizeof(c));
+    memset(d,0,sizeof(d));
+
+    for (int i=1;i<=m;++i){
+        int t=0,d1=0,d0=0;
+
+        for (int j=1;j<=n;++j)
+            if (st[i][j]=='*') ++t;
+            else if (st[i][j]=='1') d1++;
+            else if (st[i][j]=='0') d0++;
+
+       // cout<<i<<" "<<d1<<" "<<d0<<endl;
+        if (d1+d0==n&&abs(d1-d0)>x) return 0;
+        int o=0;
+        for (int j=0;j<=t;++j)
+            if (d1+j+d0<=n)
+            if (abs(d1+j-d0-(n-d1-j-d0))<=x)
+            o=1,c[i]=j;
+        for (int j=t;j>=0;--j)
+            if (d1+j+d0<=n)
+            if (abs(d1+j-d0-(n-d1-j-d0))<=x)
+            o=1,d[i]=j;
+       // cout<<c[i]<<" "<<d[i]<<endl;
+        if (!o) return 0;
+        T.addEdge(s,i,c[i]-d[i]);
+        T.addEdge(s,tt,d[i]);
+        T.addEdge(ss,i,d[i]);
+    }
+    //cout<<endl;
+    memset(c,0,sizeof(c));
+    memset(d,0,sizeof(d));
+
+    for (int i=1;i<=n;++i){
+        int t=0,d1=0,d0=0;
+
+        for (int j=1;j<=m;++j)
+            if (st[j][i]=='*') ++t;
+            else if (st[j][i]=='1') d1++;
+            else if (st[j][i]=='0') d0++;
+        if (d1+d0==m&&abs(d1-d0)>x) return 0;
+        int o=0;
+        for (int j=0;j<=t;++j)
+            if (d1+j+d0<=m)
+            if (abs(d1+j-d0-(m-d1-j-d0))<=x)
+            o=1,c[i]=j;
+        for (int j=t;j>=0;--j)
+            if (d1+j+d0<=m)
+            if (abs(d1+j-d0-(m-d1-j-d0))<=x)
+            o=1,d[i]=j;
+        if (!o) return 0;
+      //  cout<<c[i]<<" "<<d[i]<<endl;
+        T.addEdge(i+m,t,c[i]-d[i]);
+        T.addEdge(i+m,tt,d[i]);
+        T.addEdge(ss,t,d[i]);
+    }
+
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j){
+            if (st[i][j]=='1'){
+                T.addEdge(i,tt,1);
+                T.addEdge(ss,j+m,1);
+                //T.addEdge(i,j+m,0);
+             //   ans+=2;
+                res++;
+               // ans++;
+            }
+            else{
+                if (st[i][j]=='*'){
+                    T.addEdge(i,j+m,1);
+                   // T.addEdge(i,tt,0);
+                   // T.addEdge(ss,j+m,0);
+                   ans++;
+                }
+            }
+        }
+    }
+  //  cout<<endl;
+    int tmp=T.get(ss,tt);
+   // cout<<res<<" "<<tmp<<" "<<ans<<endl;
+    return tmp;
+}
+int main()
+{
+    freopen("star.inp","r",stdin);
+    freopen("star.out","w",stdout);
+    scanf("%d%d",&m,&n);
+    for (int i=1;i<=m;++i){
+        scanf("%s",st[i]+1);
+    }
+  //  cout<<ok(7);
+   // return 0;
+    int lo=0,hi=max(m,n),res=0;
+    while (hi>=lo){
+        int mid=(hi+lo)/2;
+      //  cout<<lo<<" "<<hi<<endl;
+        if (ok(mid)) hi=mid-1,res=mid;
+        else lo=mid+1;
+    }
+    cout<<res;
+}
+
+

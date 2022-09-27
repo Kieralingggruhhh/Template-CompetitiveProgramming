@@ -1,0 +1,528 @@
+// cong don 2 chieu
+
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=2e6+5;
+int m,n,q,mx;
+int a[N],s[N];
+int f[N],g[N];
+struct data{
+    int x,y,u,v,c;
+    data () {};
+    data(int _1,int _2,int _3, int _4,int _5){
+        x=_1;y=_2;u=_3;v=_4;c=_5;
+    }
+};
+data d[N];
+int id (int x,int y){
+    return x*(n+2)+y;
+}
+int getmax(int x,int y,int u,int v){
+    int _1=max(f[id(x-1,n)],f[id(m,y-1)]);
+    int _2=max(g[id(x,v+1)],g[id(u+1,1)]);
+    return max(_1,_2);
+}
+int main(){
+    freopen("INCMAT.inp","r",stdin);
+    freopen("INCMAT.out","w",stdout);
+    scanf("%d%d",&m,&n);
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j) scanf("%d",&a[id(i,j)]);
+    }
+    scanf("%d",&q);
+    for (int i=1;i<=q;++i){
+        scanf("%d%d%d%d%d",&d[i].x,&d[i].y,&d[i].u,&d[i].v,&d[i].c);
+        s[id(d[i].x,d[i].y)]+=d[i].c;
+        s[id(d[i].x,d[i].v+1)]-=d[i].c;
+        s[id(d[i].u+1,d[i].y)]-=d[i].c;
+        s[id(d[i].u+1,d[i].v+1)]+=d[i].c;
+    }
+    for (int i=1;i<=m;++i)
+        for (int j=1;j<=n;++j) s[id(i,j)]+=s[id(i-1,j)]+s[id(i,j-1)]-s[id(i-1,j-1)];
+    for (int i=1;i<=m;++i) for (int j=1;j<=n;++j) s[id(i,j)]+=a[id(i,j)];
+
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j) f[id(i,j)]=g[id(i,j)]=s[id(i,j)];
+    }
+
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+            f[id(i,j)]=max(max(f[id(i,j)],f[id(i-1,j)]),max(f[id(i-1,j-1)],f[id(i,j-1)]));
+    }
+
+    for (int i=m;i>=1;--i){
+        for (int j=n;j>=1;--j)
+            g[id(i,j)]=max(max(g[id(i,j)],g[id(i+1,j)]),max(g[id(i,j+1)],g[id(i+1,j+1)]));
+    }
+    /*
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j) cout<<s[id(i,j)]<<" ";
+        cout<<endl;
+    }
+     cout<<endl;
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+            cout<<f[id(i,j)]<<" ";
+        cout<<endl;
+    }
+    cout<<endl;
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+            cout<<g[id(i,j)]<<" ";
+        cout<<endl;
+    }
+    cout<<endl;
+    */
+    for (int i=1;i<=m;++i){
+        for (int j=1;j<=n;++j)
+            mx=max(mx,s[id(i,j)]);
+    }
+    int ans=mx;
+    for (int i=1;i<=q;++i){
+        int tmp=getmax(d[i].x,d[i].y,d[i].u,d[i].v);
+      //  cout<<i<<" "<<tmp<<" "<<mx-d[i].c<<endl;
+        if (tmp==mx) continue;
+        ans=min(ans,max(mx-d[i].c,tmp));
+    }
+    printf("%d\n",ans);
+}
+
+
+// bit + dp
+
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=1e4+5;
+int f[105][N];
+int a[N][55];
+int n;
+int s[N];
+int cal(int i,int x){
+    if (f[i][x]!=-1) return f[i][x];
+    if (i>n) return f[i][x]=0;
+    int ans=cal(i+1,x);
+    for (int j=1;j<=s[i];++j){
+        if (a[i][j]>=x) ans=max(ans,cal(i+1,a[i][j])+a[i][j]);
+    }
+    return f[i][x]=ans;
+}
+void sub1(){
+    memset(f,-1,sizeof(f));
+    cout<<cal(0,0)<<endl;
+}
+int c[N][55],T[N];
+int ans=0;
+void update(int m,int v){
+    for (;m<N;m+=m&-m) T[m]=max(T[m],v);
+}
+int get(int m){
+    int ans=0;
+    for (;m>0;m-=m&-m) ans=max(ans,T[m]);
+    return ans;
+}
+void sub2(){
+    for (int i=1;i<=n;++i){
+        for (int j=1;j<=s[i];++j){
+            c[i][j]=get(a[i][j])+a[i][j];
+            ans=max(ans,c[i][j]);
+        }
+        for (int j=1;j<=s[i];++j){
+            update(a[i][j],c[i][j]);
+        }
+    }
+    cout<<ans;
+}
+int main(){
+    freopen("pig.inp","r",stdin);
+    freopen("pig.out","w",stdout);
+    scanf("%d",&n);
+    for (int i=1;i<=n;++i){
+        scanf("%d",&s[i]);
+        for (int j=1;j<=s[i];++j) scanf("%d",&a[i][j]);
+    }
+    if (n<=100) sub1();
+    else sub2();
+}
+// net
+#include<bits/stdc++.h>
+
+using namespace std;
+#define int long long
+const int N=55;
+int x[N*N],y[N*N];
+int n,m;
+typedef pair<int,int> ii;
+int f[N][1][2][3][4][5][6][7][8][9];
+vector<int> key,tmp;
+vector<int> trans(vector<int> v, ii p){
+    vector<int> ans;
+    for (int i=v.size();i<n;++i) v.push_back(0);
+    int x=p.first;x=v[x-1];
+    int y=p.second;y=v[y-1];
+    if (x>y) swap(x,y);
+    for (int i=0;i<v.size();++i)
+        if (v[i]==y) ans.push_back(x);
+        else ans.push_back(v[i]);
+    return ans;
+}
+int ok(vector<int> v){
+    for (int i=v.size();i<n;++i) v.push_back(0);
+    for (int i=0;i<v.size();++i) if (v[i]!=key[i]) return 0;
+    return 1;
+}
+int cal(int i,vector<int> v){
+    if (i>m) return ok(v);
+    for (int i=v.size();i<n;++i) v.push_back(0);
+    if (f[i][v[0]][v[1]][v[2]][v[3]][v[4]][v[5]][v[6]][v[7]][v[8]]!=-1) return
+        f[i][v[0]][v[1]][v[2]][v[3]][v[4]][v[5]][v[6]][v[7]][v[8]];
+    int ans=0;
+    ans=cal(i+1,v)+cal(i+1,trans(v,ii(x[i],y[i])));
+    return f[i][v[0]][v[1]][v[2]][v[3]][v[4]][v[5]][v[6]][v[7]][v[8]]=ans;
+}
+main(){
+    freopen("net.inp","r",stdin);
+    freopen("net.out","w",stdout);
+    scanf("%lld%lld",&n,&m);
+    for (int i=1;i<=m;++i) scanf("%lld%lld",&x[i],&y[i]);
+    for (int i=0;i<n;++i) key.push_back(i+1);
+    int pre=n;
+    n=9;
+    for (int i=pre;i<9;++i) key.push_back(1);
+    tmp=key;
+    for (int i=1;i<=m;++i) key=trans(key,{x[i],y[i]});
+
+    memset(f,-1,sizeof(f));
+    cout<<cal(1,tmp);
+}
+// dp
+
+#include<bits/stdc++.h>
+
+using namespace std;
+#define int long long
+const int N=2e6+5;
+int f[N];
+int c[25],a[25],b[25];
+int n,x;
+int onbit(int i,int x){
+    return x|=(1<<i);
+}
+int cal(int x){
+    if (f[x]!=-1) return f[x];
+    f[x]=0;
+    if (x==(1<<n)-1) return f[x]=1;
+    int ans=0;
+    for (int i=1;i<=n;++i)
+    if ((x&c[i])==c[i]&&((x>>(i-1))&1)==0) ans+=cal(onbit(i-1,x));
+    return f[x]=ans;
+}
+main(){
+    freopen("uniper.inp","r",stdin);
+    freopen("uniper.out","w",stdout);
+    scanf("%lld",&n);
+    for (int i=1;i<=n;++i) scanf("%lld",&x),a[x]=i;
+    for (int i=1;i<=n;++i) scanf("%lld",&x),b[x]=i;
+
+    for (int i=1;i<=n;++i){
+        for (int j=1;j<=n;++j)
+            if ((a[i]<a[j]&&b[i]<b[j])) c[j]=onbit(i-1,c[j]);
+    }
+    memset(f,-1,sizeof(f));
+    cout<<cal(0);
+}
+// joshop
+
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=105;
+int n,m,ans;
+vector<int> b[N];
+int lab[N],used[N][N],c[N];
+void sub1()
+{
+    queue<int> q;
+    for (int i=1;i<=n;++i) if (lab[i]==0) q.push(i);
+  //  for (int i=1;i<=n;++i) cout<<lab[i]<<" ";
+  //  cout<<endl;
+    int ans=0,re=n;
+    while (q.size()){
+        ans++;
+        vector<int> a;
+        for (int i=1;i<=m;++i){
+            if (q.size()==0) break;
+            int u=q.front();
+            q.pop();
+            re--;
+            for (int j=0;j<b[u].size();++j){
+                int v=b[u][j];
+                if (used[u][v]) continue;
+                used[u][v]=1;
+                lab[v]--;
+                if (lab[v]==0) a.push_back(v);
+            }
+        }
+        //sort(a.begin(),a.end(),cmp);
+        for (int i=0;i<a.size();++i) q.push(a[i]);
+    }
+   // cout<<re<<" "<<ans<<endl;
+    if (re>0) cout<<-1;
+    else cout<<ans;
+}
+vector<int> a[N];
+int key;
+int f[1000*100*100*2+25];
+bitset<17>k[N];
+int onbit(int x,int t){
+    int tmp=x;
+    int a[17];
+    for (int i=1;i<=n;++i){
+        a[i]=tmp%3;
+        tmp/=3;
+    }
+    a[t]=2;
+    int res=0;
+    for (int i=n;i>=1;--i){
+        res=res*3+a[i];
+    }
+    return res;
+}
+int trans(int x){
+    int tmp=x;
+    int a[17];
+    for (int i=1;i<=n;++i){
+        a[i]=tmp%3;
+        tmp/=3;
+        if (a[i]) a[i]=1;
+    }
+    int res=0;
+    for (int i=n;i>=1;--i){
+        res=res*3+a[i];
+    }
+    return res;
+}
+int cal(int t){
+    if (f[t]!=-1) return f[t];
+    if (t==key) return f[t]=0;
+    int tmp=t;
+    int d=0;
+    int a[17];
+    f[t]=1e9;
+    bitset<17> x;
+    for (int i=1;i<=n;++i){
+        a[i]=tmp%3;
+        tmp/=3;
+        if (a[i]==1) x.set(i);
+        if (a[i]==2) ++d;
+    }
+    if (d<m){
+        for (int i=1;i<=n;++i)
+            if (a[i]==0){
+            //cout<<i<<" "<<((x&k[i])==x)<<endl;
+            if ((x&k[i])==k[i]){
+                f[t]=min(f[t],cal(onbit(t,i)));
+           ///     cout<<t<<" "<<(onbit(t,i))<<endl;
+            }
+        }
+    }
+    if (d>0) f[t]=min(f[t],cal(trans(t))+1);
+    return f[t];
+}
+void sub2()
+{
+    for (int i=1;i<=n;++i) key=key*3+1;
+   // cout<<key<<endl;
+    for (int i=1;i<=n;++i){
+        for (int j=0;j<a[i].size();++j){
+            int v=a[i][j];
+            k[i].set(v);
+        }
+    }
+    memset(f,-1,sizeof(f));
+    if (cal(0)!=1e9) cout<<cal(0);
+    else cout<<-1;
+}
+int main()
+{
+    freopen("jobshop.inp","r",stdin);
+    freopen("jobshop.out","w",stdout);
+    scanf("%d%d",&n,&m);
+    for (int i=1,x; i<=n; ++i)
+    {
+        scanf("%d",&x);
+        for (int j=1,t; j<=x; ++j)
+        {
+            scanf("%d",&t);
+            b[t].push_back(i);
+            a[i].push_back(t);
+            lab[i]++;
+        }
+    }
+    if (m>=n) sub1();
+    else sub2();
+}
+// rect
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+const int N=505;
+int  l[N],r[N],st[N*N];
+int a[N][N],mn[N],s[N],s2[N];
+int top,ans,n,m;
+int read(){
+    char c;
+    int k=0;
+    do c=getchar();
+    while ('0'>c||'9'<c);
+    for (; '0'<=c && c<='9'; c=getchar())
+        k=k*10+c-'0';
+    return k;
+}
+main()
+{
+    freopen("RECT.inp","r",stdin);
+    freopen("RECt.out","w",stdout);
+    m=read();n=read();
+    for (int i=1; i<=m; ++i)
+    {
+        for (int j=1; j<=n; ++j)
+            a[j][i]=read();
+        scanf("\n");
+    }
+    ans=a[1][1];
+    for (int i1=1; i1<=m; i1++)
+    {
+
+        for (int j=1; j<=n; ++j)
+            mn[j]=1e18;
+        for (int j=1; j<=n; ++j)
+            s2[j]=0,s[j]=0;
+
+        for (int i2=i1; i2<=m; i2++)
+        {
+            top=0;
+
+            for (int j=1; j<=n; ++j)
+                mn[j]=min(mn[j],a[j][i2]),s2[j]+=a[j][i2];
+
+            for (int j=1; j<=n; ++j)
+                s[j]=s2[j]+s[j-1];
+
+            for (int j=1; j<=n; ++j)
+            {
+                while (top>0 && mn[st[top]]>mn[j])
+                    r[st[top]]=j-1,top--;
+                l[j]=st[top]+1;
+                st[++top]=j;
+            }
+            while (top>0)
+                r[st[top]]=n,top--;
+
+            for (int j=1; j<=n; ++j)
+                ans=max(ans,(s[r[j]]-s[l[j]-1])*mn[j]);
+        }
+    }
+    cout<<ans;
+
+}
+// rmq
+
+#include <stdio.h>
+#include <math.h>
+
+int a[230997];
+int M[230997][23];
+int n, m;
+
+int max(int a, int b){ return a>b?a:b; }
+
+main(){
+    int i,k;
+    scanf("%d%d", &n, &m);
+    for (i=1; i<=n; i++)
+    scanf("%d", &a[i]);
+
+    for (i=1; i<=n; i++) M[i][0]=a[i];
+
+    for (k=1; (1<<k)<=n; k++)
+    for (i=1; i+(1<<k)-1<=n; i++)
+    M[i][k] = max(M[i][k-1], M[i+(1<<(k-1))][k-1]);
+
+    int u, v;
+  while(m--){
+    scanf("%d%d", &u, &v);
+    k=log2(v-u+1);
+    printf("%d\n", max(M[u][k],M[v-(1<<k)+1][k]));
+  }
+}
+// fast io
+
+inline int read(){
+    char c='@';int r=1;
+    for (c = getchar(); (c < '0' || c > '9')&&c!='-'; c = getchar());
+    if (c=='-') r=-1,c=getchar();
+    int res=c-'0';
+    for (c = getchar(); c >= '0' && c <= '9'; c = getchar())
+        res = res * 10 + c - '0';
+    return res*r;
+}
+// psw
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N=1e5+5;
+int a,b,x,y,m;
+string num(int x){
+    string s="";
+    while (x){
+        s=s+(char)(x%10+'0');
+        x/=10;
+    }
+    reverse(s.begin(),s.end());
+    return s;
+}
+string cal(int x,int y){
+   // cout<<x<<" "<<y<<endl;
+    string s="";
+    if (x<y){
+        s=s+"W";
+        swap(x,y);
+    }
+    if (x==y||x==0||y==0) return s;
+
+    s=s+"S";
+    if (y!=1) s=s+num((x-1)/y);
+    else s=s+num((x)/y);
+    s=s+cal(x%y,y);
+    return s;
+}
+string cal2(int x,int y){
+  //  cout<<x<<" "<<y<<endl;
+    string s="";
+    int c=0;
+    if (x<y) {
+        c=1;
+        swap(x,y);
+    }
+    if (x==y||x==0||y==0) {
+        if (c)
+        return s+"W";
+        return s;
+    }
+    s=cal2(x%y,y)+s;
+    s=s+"P";
+    if (y!=1) s=s+num((x-1)/y);
+    else s=s+num((x)/y);
+    if (c) s=s+"W";
+    return s;
+}
+int main(){
+    freopen("psw.inp","r",stdin);
+    freopen("psw.out","w",stdout);
+    cin>>a>>b>>x>>y>>m;
+    cout<<cal(a,b)+cal2(x,y);
+}
+

@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define task "USAB"
+#define maxn 1000000
+typedef pair <long long ,long long> ii;
+ii a[maxn];
+long long m,a1,b,ans(0);
+#define x first
+#define y second
+int c[maxn];
+void sangnguyento()
+{
+    for (int i=1;i<=maxn;i++) c[i]=i;
+   c[1]=c[0]=-1;
+    for (int p=2;p*p<=maxn;p++)
+    {   if (c[p]==p)
+        {  int j=p*p;
+            while (j<=maxn)
+            {   if (c[j]==j)
+                {c[j]=p;}
+                j=j+p;
+    } }   } }
+    bool ailinh(long long x)
+{
+    int tmp,k;
+    tmp=x;
+    for (int i=1;i<=m;i++) {
+            k=a[i].y;
+    if (a[i].x==c[tmp])
+        {
+    while (tmp%c[tmp]==0&&k>0&&tmp>1&&c[tmp]==a[i].x)
+    {
+        k--;
+        tmp/=c[tmp];
+    }
+}
+
+        }
+        if (tmp==1) return true;
+        else return false;
+}
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    freopen(task".INP","r",stdin);
+     freopen(task".OUT","w",stdout);
+     cin>>m;
+     sangnguyento();
+     for (int i=1;i<=m;i++)
+     {
+         cin>>a[i].x;
+         cin>>a[i].y;
+     }
+     for (int i=1;i<=3;i++)
+     {
+         ans=0;
+         cin>>a1>>b;
+         for (int j=a1;j<=b;j++)
+         {
+if (ailinh(j))
+{ans++;}
+         }
+        cout<<ans;
+        cout<<"\n";
+}
+}

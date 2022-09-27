@@ -1,0 +1,109 @@
+
+
+  #include<bits/stdc++.h>
+  using namespace std;
+  #define task "LUBENICA"
+  const int maxn=1e5+5;
+  const int maxx=1e9;
+  const int minn=-1e9;
+  typedef long long lll;
+  typedef pair<int,int> ii;
+
+  int n,wmin[maxn][32],wmax[maxn][32];
+  vector <vector<ii> > a(maxn);
+  int b[maxn][32];
+  int l[maxn];
+
+     void dfs(int u)
+     {
+         for (int i=0;i<a[u].size();i++)
+         {
+             int v=a[u][i].first;
+             int w1=a[u][i].second;
+             if (v!=b[u][0])
+             {
+                 b[v][0]=u;
+                 l[v]=l[u]+1;
+                 wmin[v][0] =w1;
+                  wmax[v][0] = w1;
+                  dfs(v);
+             }
+         }
+     }
+
+    void chuanbi()
+    {
+        memset(b,-1,sizeof(b));
+        dfs(0);
+
+        for (int i=1;(1<<i)<n;i++)
+        {
+            for (int j=0;j<n;j++)
+            {
+                if (b[j][i-1]!=-1)
+                {
+                b[j][i]=b[b[j][i-1]][i-1];
+                wmax[j][i]=max(wmax[j][i-1],wmax[b[j][i-1]][i-1]);
+                wmin[j][i]=min(wmin[j][i-1],wmin[b[j][i-1]][i-1]);
+            }
+        }
+    }
+    }
+
+    void query (int u,int v)
+    {
+        if (l[u]<l[v]) swap(u,v);
+     int log = 0; for(; 1 << log <= l[u]; ++log); --log;
+      int wm=maxx;
+      int wmm=minn;
+
+      for (int i=log;i>=0;i--)
+      {
+          if (l[u]-(1<<i) >=l[v])
+          {
+              wm=min(wm,wmin[u][i]);
+              wmm=max(wmm,wmax[u][i]);
+               u=b[u][i];
+          }
+      }
+      if(u != v)
+        {
+		for(int i = log; i >= 0; --i)
+			if(b[u][i] != b[v][i])
+			{
+				wm = min(wm, min(wmin[u][i],wmin[v][i]));
+				wmm = max(wmm, max(wmax[u][i],wmax[v][i]));
+				u = b[u][i]; v = b[v][i];
+			}
+		wm = min(wm, min(wmin[u][0], wmin[v][0]));
+		wmm = max(wmm, max(wmax[u][0], wmax[v][0]));
+    }
+    printf("%d %d\n",wm,wmm);
+    }
+
+    int main()
+   {
+       ios_base::sync_with_stdio(false);
+       cin.tie(NULL);
+      freopen(task".INP","r",stdin);
+       freopen(task".OUT","w",stdout);
+
+       scanf("%d",&n);
+       int x,y,w;
+       for (int i=1;i<=n-1;i++)
+       {
+           scanf("%d%d%d",&x,&y,&w);
+           x--;
+           y--;
+           a[x].push_back(ii(y,w));
+           a[y].push_back(ii(x,w));
+       }
+       chuanbi();
+       int k;
+       scanf("%d",&k);
+       while (k--)
+       {
+        int u, v; scanf("%d%d",&u,&v);
+		query(--u, --v);
+       }
+   }

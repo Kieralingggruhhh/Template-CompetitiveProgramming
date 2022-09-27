@@ -1,0 +1,203 @@
+
+ #include<bits/stdc++.h>
+  #include <bits/stdc++.h>
+#define maxn 25010
+#define maxk 1010
+#define cmax 1000000007
+#define llmax (1LL << 61)
+#define el '\n'
+#define pb push_back
+#define mp make_pair
+#define getbit(s,i) ((s>>(i-1))&1)
+#define bug(X) { cerr << #X << " = " << (X) << endl; }
+#define IOS ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define For(i,a,b) for(int i = a; i <= b; i++)
+#define Ford(i,a,b) for(int i = a; i >= b; i--)
+#define Forv(i,v) for(int i = 0, _v = v.size(); i < _v; i++)
+ using namespace std;
+
+ #define task "TRAFFICJAM"
+ #define int long long
+ const long long vc=1e18+5;
+ const int add=1e5;
+ typedef long long ll;
+ typedef pair<int,int> ii;
+ #define fi first
+ #define se second
+
+ int m,n,k;
+ vector<int> edge[maxn],taphop[maxn];
+ int vt[maxn];
+  ll cnt(0),kh(0),dd[maxn];
+  map<ll,int> mpp;
+  vector<ii> a[maxn];
+ class DinitzFlow
+{
+    private:
+    vector<int> dist, head, work;
+    vector<int> point, flow, capa, next;
+    int n, m;
+
+    bool bfs(int s, int t)
+    {
+        For(i, 1, n) dist[i] = -1;
+        queue<int> q;
+        dist[s] = 0; q.push(s);
+        while (!q.empty())
+        {
+            int u = q.front();
+            q.pop();
+            for (int i = head[u]; i >= 0; i = next[i])
+                if (flow[i] < capa[i] && dist[point[i]] < 0)
+                {
+                    dist[point[i]] = dist[u] + 1;
+                    q.push(point[i]);
+                }
+        }
+        return dist[t] >= 0;
+    }
+
+    int dfs(int s, int t, int f)
+    {
+        if (s == t) return f;
+        for (int &i = work[s]; i >= 0; i = next[i])
+            if (flow[i] < capa[i] && dist[point[i]] == dist[s] + 1)
+            {
+                int d = dfs(point[i], t, min(f, capa[i] - flow[i]));
+                if (d > 0)
+                {
+                    flow[i] += d;
+                    flow[i ^ 1] -= d;
+                    return d;
+                }
+            }
+        return 0;
+    }
+
+    public:
+    DinitzFlow(int n = 0)
+    {
+        this->n = n;
+        this->m = 0;
+        dist.assign(n + 7, 0);
+        head.assign(n + 7, -1);
+        work.assign(n + 7, 0);
+    }
+
+    void addEdge(int u, int v, int c1, int c2 = 0)
+    {
+        point.push_back(v); capa.push_back(c1); flow.push_back(0); next.push_back(head[u]); head[u] = m++;
+        point.push_back(u); capa.push_back(c2); flow.push_back(0); next.push_back(head[v]); head[v] = m++;
+    }
+
+    int maxFlow(int s, int t)
+    {
+        int totFlow = 0;
+        while (bfs(s, t))
+        {
+            For(i, 1, n) work[i] = head[i];
+            while (true)
+            {
+                int d = dfs(s, t, cmax);
+                if (d == 0) break;
+                totFlow += d;
+            }
+        }
+        return totFlow;
+    }
+};
+  void dijistra()
+   {
+       priority_queue<ii,vector<ii>,greater<ii> > que;
+       for (int i=1;i<=n;i++)
+        dd[i]=vc;
+
+       dd[1]=0;
+       que.push(ii(0,1));
+
+       while (que.size())
+       {
+           int uu,du;
+           uu=que.top().se;du=que.top().fi;que.pop();
+           if(du!=dd[uu]) continue;
+           for (int i=0;i<a[uu].size();i++)
+           {
+               int v=a[uu][i].fi;
+               if(dd[v]>dd[uu]+a[uu][i].se)
+               {
+                   dd[v]=dd[uu]+a[uu][i].se;
+                   que.push(ii(dd[v],v));
+               }
+           }
+       }
+   }
+   int cal(const vector<int> &v)
+    {
+      DinitzFlow Dinitz(n+1);
+        for (int i=1;i<=n;i++)
+            for (int j=0;j<a[i].size();j++)
+        {
+            int v=a[i][j].fi,w=a[i][j].se;
+            if(dd[i]==(dd[v]+w))
+              Dinitz.addEdge(i,v,1);
+        }
+        for (int i=0;i<v.size();i++)
+        {
+            Dinitz.addEdge(n+1,v[i],1);
+        }
+     //   while (findpath()) incflow();
+
+   return Dinitz.maxFlow(n+1,1);
+    }
+
+   void process()
+    {
+
+        for (int i=1;i<=k;i++)
+        {
+            if(mpp[dd[vt[i]]]==0)
+                mpp[dd[vt[i]]]=++cnt;
+        }
+
+        for (int i=1;i<=k;i++)
+         {
+             taphop[mpp[dd[vt[i]]]].push_back(vt[i]);
+          //   cout<<mp[dd[vt[i]]]<<endl;
+         }
+  long long res(0);
+        for (int i=1;i<=cnt;i++)
+            {
+                res+=cal(taphop[i]);
+               // cout<<taphop[i].size();
+                //cout<<res<<endl;
+            }
+
+        cout<<res<<endl;
+
+    }
+
+   main()
+    {
+        freopen(task".INP","r",stdin);
+        freopen(task".OUT","w",stdout);
+
+      scanf("%lld%lld%lld",&n,&m,&k);
+
+      for (int i=1;i<=m;i++)
+      {
+          int u,v,w;
+          scanf("%lld%lld%lld",&u,&v,&w);
+          a[u].push_back(ii(v,w));
+          a[v].push_back(ii(u,w));
+      }
+
+      for (int i=1;i<=k;i++)
+        scanf("%lld",&vt[i]);
+
+
+      dijistra();
+
+/*      for (int i=2;i<=n;i++)
+        cout<<dd[i]<<endl;*/
+      process();
+    }

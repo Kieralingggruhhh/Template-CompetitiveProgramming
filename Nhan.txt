@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll a,b,m;
+
+ll mul(ll a,ll b,ll base)
+{
+    ll r=0;
+    while (b)
+    {
+        if (b&1)
+            r=(r+a)%base;
+        a=(a+a)%base;
+        b=b>>1;
+    }
+    return r;
+}
+ll mul(ll x,ll y)
+{
+    x%=base;
+    y%=base;
+    ld q=ld(x)*y/base;
+    ll iq=q;
+    ll r=(x*y-iq*base)%base;
+    if (r<0) r+=base;
+    return r;
+}
+ll pp(ll a,ll b, ll base)
+{
+   ll r=1;
+   for(;b;b/=2,a=mul(a,a,base))
+        if (b%2)
+        r=mul(r,a,base);
+        return r;
+}
+ll phi(ll n)
+{
+    ll r=n;
+    for (int i=2;i*i<=n&&i<1e7;++i)
+        if (n%i==0)
+    {
+        r=r/i*(i-1);
+        while (n%i==0) n/=i;
+    }
+    if (n>1) r=r/n*(n-1);
+    return r;
+}
+/*
+    nhan O(1)
+    #include<bits/stdc++.h>
+using namespace std;
+int main(){
+    //tinh x*y%m
+    x%=m;
+    y%=m;
+    ld q=ld(x)*y/m // chia th?c
+    lli iq=q //làm tròn, l?y nguyên;
+    lli r=(x*y-iq*m)%m;
+    if (r<0) r+=m;
+    return r;
+}
+
+*/
+
+/*
+    nCk
+    ll pow(ll x, ll y){
+	if (y==0) return 1;
+	if (y==1) return x%base;
+	ll tmp=pow(x, y/2);
+	return ((tmp*tmp)%base)*pow(x, y%2)%base;
+}
+
+ll nCk(const ll &n, const ll &k){
+	return (gt[n]*(pow(gt[n-k], base-2)*pow(gt[k], base-2)%base)%base);
+}
+
+void init(){
+    gt[0]=1;
+    for (int i=1;i<=m*n+1;++i) gt[i]=(gt[i-1]*i)%base;
+}
+
+*/
+int main()
+{
+    freopen("cal.inp","r",stdin);
+    freopen("cal.out","w",stdout);
+    scanf("%lld%lld%lld",&a,&b,&m);
+    printf("%lld\n",(a+b)%m);
+    printf("%lld\n",mul(a,b,m));
+    printf("%lld\n",pp(a,b,m));
+    ll here=phi(m);
+    ll curr=pp(b,a+b,here);
+    printf("%lld\n",pp(a,curr,m));
+}
+
+
+

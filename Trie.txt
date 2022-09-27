@@ -1,0 +1,332 @@
+
+ #include<bits/stdc++.h>
+ using namespace std;
+ #define task "ICNT"
+  typedef long long ll;
+  typedef pair<int,int> ii;
+  #define fi first
+  #define se second
+   const int maxn=3e7+5;
+  //ii c[maxn];
+  const int MX = 1000000000;
+  const int mod=2e9+1;
+  const int base=1e9;
+ int n,q;
+ int ntrie(100011),trie[maxn][4];
+ int a[maxn];
+ void push(int k, int key,int val){
+    key += MX;
+    trie[k][2] += val;
+    for (int i=31;i--;){
+        int t=(key>>i)&1;
+        if (trie[k][t]==0) trie[k][t] = ++ntrie;
+        k = trie[k][t];
+        trie[k][2] += val;
+    }
+}
+
+ int less_than(int k,int key)
+  {
+    key += MX;
+    int ans=0;
+    for (int i=31;i--;){
+        int t=(key>>i)&1;
+        if (t) ans += trie[trie[k][0]][2];
+        if (trie[k][t]==0) break;
+        k = trie[k][t];
+    }
+    return ans;
+}
+
+void add(int x,int y,int val){
+    for(;x<=n;x+=x&-x) push(x,y,val);
+}
+
+int cnt(int x,int y){
+    int ans=0;
+    for(--x;x;x-=x&-x) ans += less_than(x,y);
+    return ans;
+}
+
+int iv(int i){
+    return (i-1) - cnt(i,a[i]+1) + cnt(n+1,a[i]) - cnt(i+1,a[i]);
+}
+
+ int main()
+ {
+     freopen(task".INP","r",stdin);
+     freopen(task".OUT","w",stdout);
+
+   //  int q,n;
+     scanf("%d",&n);
+
+     for (int i=1;i<=n;i++)
+     {
+    //     int x;
+         scanf("%d",&a[i]);
+         add(i,a[i],1);
+     }
+   long long sum(0),ans(0);
+   for (int i=1;i<=n;i++)
+   {
+       ans+=iv(i);
+   }
+   ans=ans/2;
+   scanf("%d",&q);
+   while (q--)
+   {
+       int pp;
+       long long ss;
+       scanf("%d%lld",&pp,&ss);
+       ss=abs(ss+sum)%(mod)-base;
+       ans-=iv(pp);
+       add(pp,a[pp],-1);
+       a[pp]+=ss;
+       add(pp,a[pp],1);
+       ans+=iv(pp);
+       sum=sum+ans;
+       printf("%lld\n",ans);
+   }
+   return 0;
+ }
+
+
+
+//
+
+
+ #include<bits/stdc++.h>
+ using namespace std;
+ #define task "QUERYK"
+ const int MX = 1000000000;
+ const int maxn=3e6+5;
+ int trie[maxn][3],ntrie(1);
+
+ void push(int key,int val)
+  {
+      int k=1;
+      key+=MX;
+      trie[k][2]+=val;
+      for (int i=31;i--;)
+      {
+          int t;
+          t=(key>>i)&1;
+           if(trie[k][t]==0) trie[k][t]=++ntrie;
+           k=trie[k][t];
+           trie[k][2]+=val;
+      }
+  }
+
+  int thutu(int n)
+   {
+       int k=1;
+       int ans(0);
+       for (int i=31;i--;)
+       {
+           int t;
+           t=0;
+          if(trie[trie[k][0]][2]<n)
+          {
+              n-=trie[trie[k][0]][2];
+              t=1;
+          }
+          k=trie[k][t];
+          ans |= t<<i;
+       }
+        ans-=MX;
+       return ans;
+   }
+
+   int nhohon(int key)
+   {
+       int k=1;
+       key+=MX;
+       int ans(0);
+       for (int i=31;i--;)
+       {
+           int t;
+           t=(key>>i)&1;
+           if(t)
+            ans+=trie[trie[k][0]][2];
+           if(trie[k][t]==0) break;
+            k=trie[k][t];
+       }
+
+       return ans;
+   }
+
+ void pop(int key,bool all)
+{
+    int f = nhohon(key+1) - nhohon(key);
+    if (f){
+        push(key,all ? -f : -1);
+    }
+}
+
+   int main()
+    {
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+        freopen(task".INP","r",stdin);
+        freopen(task".OUT","w",stdout);
+        int n,a;
+        scanf("%d",&n);
+    //    long long sum(0);
+
+        while(n--)
+        {
+            scanf("%d",&a);
+            //cout<<a;
+            push(a,1);
+        }
+    // int ans;
+    // ans=nhohon(-2);
+    // cout<<ans<<endl;
+        int q;
+        scanf("%d",&q);
+        long long sum(0);
+        while(q--)
+        {
+            int type;
+            scanf("%d",&type);
+            int u;
+            if(type==1)
+            {
+            //    int u;
+                scanf("%d",&u);
+                u = abs(u+sum) % 2000000001 - 1000000000;
+                push(u,1);
+            }
+            else if(type==2)
+            {
+               // int u;
+                scanf("%d",&u);
+                 u = abs(u+sum) % 2000000001 - 1000000000;
+                pop(u,0);
+            }
+            else if(type==3)
+            {
+                scanf("%d",&u);
+                 u = abs(u+sum) % 2000000001 - 1000000000;
+                pop(u,1);
+            }
+            else if(type==4)
+            {
+                scanf("%d",&u);
+                int ans=thutu(u);
+                sum+=ans;
+                printf("%d\n",ans);
+            }
+            else if(type==5)
+            {
+                int l,r;
+                scanf("%d%d",&l,&r);
+                int ans;
+                ans=nhohon(r+1)-nhohon(l);
+                printf("%d\n",ans);
+
+            }
+        }
+    }
+
+
+//
+
+
+#include<bits/stdc++.h>
+using namespace std;
+template<typename T> ostream& operator<<(ostream& os, vector<T> a){os<<"( ";for(T &x:a)os<<x<<" ";os<<")\n";return os;}
+template<typename T> ostream& operator<<(ostream& os, pair<T,T> a){os<<"("<<a.first<<" "<<a.second<<") ";return os;}
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef vector<int> vi;
+typedef vector<pii> vii;
+typedef vector<vi> vvi;
+#define all(a) a.begin(),a.end()
+#define debug(x) cerr<<#x<<" = "<<x<<endl
+#define x first
+#define y second
+//===========================Head=========================//
+const int n=1000000000, logmax=30;
+int trie[900*40000][3], ntrie;
+
+void push(int root,int key,int val){
+    for (int i=logmax;i--;){
+        int t=(key>>i)&1;
+        if (trie[root][t]==0){
+            trie[root][t]=++ntrie;
+        }
+        root=trie[root][t];
+        trie[root][2]+=val;
+    }
+}
+
+int calsum(int root,int key){
+    int ans=0;
+    for (int i=logmax;i--;){
+        int t=(key>>i)&1;
+        if (t==1) ans+=trie[trie[root][0]][2];
+        if (trie[root][t]==0){
+            break;
+        }
+        root=trie[root][t];
+    }
+    return ans;
+}
+
+unordered_map<int,int> M;
+void add(int x,int y,int m){
+    for (++x;x<=n;x+=x&-x){
+        int &root=M[x];
+        if (root==0){
+            root=++ntrie;
+        }
+        push(root,y,m);
+    }
+}
+
+int query(int x,int y){
+    int ans=0;
+    for (++x;x;x-=x&-x){
+        int &root=M[x];
+        if (root==0){
+            continue;
+        }
+        ans+=calsum(root,y+1);
+    }
+    return ans;
+}
+
+int query(int x,int y,int u,int v){
+    return query(u,v)-query(x-1,v)-query(u,y-1)+query(x-1,y-1);
+}
+
+main(){
+    freopen("QUERY.inp","r",stdin);
+    freopen("QUERY.out","w",stdout);
+    int q;
+    ll sum=0;
+    scanf("%d",&q);
+    //debug(q);
+    while(q--){
+        int i,x,y;
+        scanf("%d%d%d",&i,&x,&y);
+        //if (q==1716) cerr<<i<<" "<<x<<" "<<y<<endl;
+        x=(x+sum)%n;
+        y=(y+sum)%n;
+        if (i==1){
+            int m;
+            scanf("%d",&m);
+            //m=(m+sum)%n;
+            add(x,y,m);
+            continue;
+        }
+        int u,v;
+        scanf("%d%d",&u,&v);
+        u=(u+sum)%n;
+        v=(v+sum)%n;
+        int ans=query(x,y,u,v);
+        printf("%d\n",ans);
+        sum=(sum+abs(ans))%n;
+    }
+}
